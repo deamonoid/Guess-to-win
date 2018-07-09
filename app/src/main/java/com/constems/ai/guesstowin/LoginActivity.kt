@@ -20,15 +20,17 @@ class LoginActivity : AppCompatActivity() {
         setSupportActionBar(toolbar_loginActivity)
 
         button_loginActivity_logIn.setOnClickListener {
-            getPostRequest("new", "pass")
+            val userName = textInputEditText_loginActivity_userName.text.toString()
+            val password = textInputEditText_loginActivity_password.text.toString()
+            getPostRequest(userName = userName, password = password)
         }
     }
 
-    private fun getPostRequest(emailId: String, password: String) {
+    private fun getPostRequest(userName: String, password: String) {
 
         val client = OkHttpClient()
         val body = FormBody.Builder()
-                .add("emailId", emailId)
+                .add("userName", userName)
                 .add("password", password)
                 .build()
 
