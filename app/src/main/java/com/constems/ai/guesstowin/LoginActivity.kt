@@ -35,7 +35,7 @@ class LoginActivity : AppCompatActivity() {
                 .build()
 
         val request = Request.Builder()
-                .url("https://192.168.1.82/login_script/login.php")
+                .url("http://192.168.1.82/game_script/login.php")
                 .post(body)
                 .build()
 
