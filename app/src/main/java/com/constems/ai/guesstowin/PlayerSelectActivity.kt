@@ -16,12 +16,14 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.longToast
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.yesButton
+import org.json.JSONArray
 import java.io.IOException
 
 class PlayerSelectActivity : AppCompatActivity() {
 
     private var playerArrayList: ArrayList<String> = ArrayList()
 
+    private var mAdapter: ListAdapter? = null
     private val tag = PlayerSelectActivity::class.java.simpleName
     private var userName: String? = null
 
@@ -33,20 +35,16 @@ class PlayerSelectActivity : AppCompatActivity() {
 
         val builder = intent.extras
         userName = builder.getString("username", "")
-        Log.i(tag, userName)
+        getPostPLayerListRequest(userName!!)
 
-        playerArrayList.add("Prachi")
-        playerArrayList.add("Raju")
-        playerArrayList.add("Rahman")
-        playerArrayList.add("Simran")
-        playerArrayList.add("Ali")
+        swipeRefreshLayout_playerSelect.setOnRefreshListener {
+            getPostPLayerListRequest(userName!!)
+        }
 
         val layoutManager = LinearLayoutManager(this@PlayerSelectActivity)
         recyclerView_playerSelect.layoutManager = layoutManager
-        val mAdapter = ListAdapter(playerArrayList)
+        mAdapter = ListAdapter(playerArrayList)
         recyclerView_playerSelect.adapter = mAdapter
-
-        Log.v(tag, "Size" + playerArrayList.size.toString())
     }
 
     inner class ListAdapter(private val playerList: ArrayList<String>) : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
@@ -71,8 +69,50 @@ class PlayerSelectActivity : AppCompatActivity() {
         }
     }
 
-    private fun getPostRequest(userName: String) {
+    private fun getPostPLayerListRequest(userName: String) {
+        val client = OkHttpClient()
+        val body = FormBody.Builder()
+                .add("userName", userName)
+                .build()
 
+        val request = Request.Builder()
+                .url("http://192.168.1.82/game_script/list_player.php")
+                .post(body)
+                .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: okhttp3.Call?, e: IOException?) {
+                val message = e?.message.toString()
+                Log.w(tag, "Failure Response: $message")
+
+                this@PlayerSelectActivity.runOnUiThread {
+                    longToast("Please check your internet Connection!")
+                }
+            }
+
+            override fun onResponse(call: okhttp3.Call?, response: Response?) {
+                val message = response?.body()?.string()
+                Log.d(tag, "Message received $message")
+                this@PlayerSelectActivity.runOnUiThread {
+                    if (message != "[]" && message != "0") {
+                        playerArrayList.clear()
+                        val array = JSONArray(message)
+                        for (i in 0 until array.length()) {
+                            val temp = array.getJSONObject(i)
+                            playerArrayList.add(temp.getString("user_name").capitalize())
+                        }
+                        Log.v(tag, "PlayerList: " + playerArrayList.size)
+                        mAdapter!!.notifyDataSetChanged()
+                        swipeRefreshLayout_playerSelect.isRefreshing = false
+                    } else {
+                        longToast("No player online")
+                    }
+                }
+            }
+        })
+    }
+
+    private fun getPostRequest(userName: String) {
         val client = OkHttpClient()
         val body = FormBody.Builder()
                 .add("userName", userName)
