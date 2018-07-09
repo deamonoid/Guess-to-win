@@ -2,7 +2,14 @@ package com.constems.ai.guesstowin
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.constraint.ConstraintLayout
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_player_select.*
 import okhttp3.*
 import org.jetbrains.anko.alert
@@ -12,6 +19,8 @@ import org.jetbrains.anko.yesButton
 import java.io.IOException
 
 class PlayerSelectActivity : AppCompatActivity() {
+
+    private var playerArrayList: ArrayList<String> = ArrayList()
 
     private val tag = PlayerSelectActivity::class.java.simpleName
     private var userName: String? = null
@@ -25,6 +34,41 @@ class PlayerSelectActivity : AppCompatActivity() {
         val builder = intent.extras
         userName = builder.getString("username", "")
         Log.i(tag, userName)
+
+        playerArrayList.add("Prachi")
+        playerArrayList.add("Raju")
+        playerArrayList.add("Rahman")
+        playerArrayList.add("Simran")
+        playerArrayList.add("Ali")
+
+        val layoutManager = LinearLayoutManager(this@PlayerSelectActivity)
+        recyclerView_playerSelect.layoutManager = layoutManager
+        val mAdapter = ListAdapter(playerArrayList)
+        recyclerView_playerSelect.adapter = mAdapter
+
+        Log.v(tag, "Size" + playerArrayList.size.toString())
+    }
+
+    inner class ListAdapter(private val playerList: ArrayList<String>) : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
+        inner class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val playerTextView: TextView = view.findViewById(R.id.textView_recyclerComponent_activeOpponentName)
+            val playerListItem: ConstraintLayout = view.findViewById(R.id.constraintLayout_recyclerComponent)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+            val itemView = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.recyclerview_component_opponent, parent, false)
+            return MyViewHolder(itemView)
+        }
+
+        override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+            holder.playerTextView.text = playerList[position]
+            holder.playerListItem.setOnClickListener {}
+        }
+
+        override fun getItemCount(): Int {
+            return playerList.size
+        }
     }
 
     private fun getPostRequest(userName: String) {
