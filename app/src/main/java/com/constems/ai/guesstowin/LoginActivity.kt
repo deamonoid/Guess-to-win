@@ -54,7 +54,7 @@ class LoginActivity : AppCompatActivity() {
                 Log.d(tag, "Message received $message")
                 this@LoginActivity.runOnUiThread {
                     if (message != "[]" && message != "0") {
-                        val intent = Intent(this@LoginActivity, GameActivity::class.java)
+                        val intent = Intent(this@LoginActivity, PlayerSelectActivity::class.java)
                         startActivity(intent)
                         finish()
                     } else {
