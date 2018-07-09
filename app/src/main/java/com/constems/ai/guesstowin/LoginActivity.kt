@@ -55,6 +55,7 @@ class LoginActivity : AppCompatActivity() {
                 this@LoginActivity.runOnUiThread {
                     if (message != "[]" && message != "0") {
                         val intent = Intent(this@LoginActivity, PlayerSelectActivity::class.java)
+                        intent.putExtra("username", userName)
                         startActivity(intent)
                         finish()
                     } else {
