@@ -118,6 +118,7 @@ class PlayerSelectActivity : AppCompatActivity() {
                         intent.putExtra("my_firebase_id", myFirebaseId)
                         intent.putExtra("player_firebase_id", firebaseId)
                         intent.putExtra("opponent_name", opponentName)
+                        intent.putExtra("isHost", false)
                         startActivity(intent)
                         finish()
                     } else {
