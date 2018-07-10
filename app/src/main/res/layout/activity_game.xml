@@ -26,7 +26,8 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Message will be recieved here"
+        android:text="Their message"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -65,6 +66,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="Name"
+        android:textSize="30sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_gameActivity" />
 
@@ -75,6 +77,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
         android:text="Your turn"
+        android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_gameActivity" />
 </android.support.constraint.ConstraintLayout>
