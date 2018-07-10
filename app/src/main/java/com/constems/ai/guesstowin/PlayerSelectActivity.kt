@@ -121,48 +121,4 @@ class PlayerSelectActivity : AppCompatActivity() {
             }
         })
     }
-
-//    private fun getPostRequest(userId: Int) {
-//        val client = OkHttpClient()
-//        val body = FormBody.Builder()
-//                .add("userId", userId.toString())
-//                .build()
-//
-//        val request = Request.Builder()
-//                .url("http://192.168.1.82/game_script/logout.php")
-//                .post(body)
-//                .build()
-//
-//        client.newCall(request).enqueue(object : Callback {
-//            override fun onFailure(call: okhttp3.Call?, e: IOException?) {
-//                val message = e?.message.toString()
-//                Log.w(tag, "Failure Response: $message")
-//
-//                this@PlayerSelectActivity.runOnUiThread {
-//                    longToast("Please check your internet Connection!")
-//                }
-//            }
-//
-//            override fun onResponse(call: okhttp3.Call?, response: Response?) {
-//                val message = response?.body()?.string()
-//                Log.d(tag, "Message received $message")
-//                this@PlayerSelectActivity.runOnUiThread {
-//                    if (message != "[]" && message != "0") {
-//                        finish()
-//                    } else {
-//                        longToast("Error occurred")
-//                    }
-//                }
-//            }
-//        })
-//    }
-//
-//    override fun onBackPressed() {
-//        alert("Do you want to Logout?") {
-//            yesButton {
-//                getPostRequest(userId)
-//            }
-//            noButton { }
-//        }.show()
-//    }
 }
