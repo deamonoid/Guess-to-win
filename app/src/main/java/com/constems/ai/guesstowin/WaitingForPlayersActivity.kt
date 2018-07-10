@@ -3,19 +3,21 @@ package com.constems.ai.guesstowin
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import com.google.firebase.firestore.*
 import kotlinx.android.synthetic.main.activity_waiting_for_players.*
 import okhttp3.*
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.longToast
-import org.jetbrains.anko.noButton
-import org.jetbrains.anko.yesButton
 import java.io.IOException
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import org.jetbrains.anko.*
+
 
 class WaitingForPlayersActivity : AppCompatActivity() {
 
     private val tag = WaitingForPlayersActivity::class.java.simpleName
     private var userId: Int = 0
     private var myFirebaseId: String = String()
+    private var listenerRegistration: ListenerRegistration? = null
+    private var db: FirebaseFirestore? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +28,52 @@ class WaitingForPlayersActivity : AppCompatActivity() {
         val builder = intent.extras
         userId = builder.getInt("user_id", 0)
         myFirebaseId = builder.getString("firebase_id", "")
+
+        listenToFireStore()
+    }
+
+    private fun listenToFireStore() {
+        db = FirebaseFirestore.getInstance()
+
+        //Added because in documentation
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build()
+        db?.firestoreSettings = settings
+
+        //Listener starts from here
+        val docRef = db?.collection("users")?.document(myFirebaseId)
+        listenerRegistration = docRef?.addSnapshotListener { snapshot, firebaseFirestoreException ->
+            if (firebaseFirestoreException != null) {
+                Log.w(tag, "Listen failed.", firebaseFirestoreException)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                val timestamp = snapshot.getTimestamp("created_at")
+                val date = timestamp?.toDate()
+                Log.d(tag, "Current date: $date")
+
+                val data = snapshot.data!!
+                val opponentId = data["opponentId"]
+
+                if (opponentId != "") {
+
+                }
+
+            } else {
+                Log.d(tag, "Current data: null")
+            }
+        }
+    }
+
+    private fun removeOpponentId() {
+        db = FirebaseFirestore.getInstance()
+
+        val data = HashMap<String, Any>()
+        data["opponentId"] = ""
+        db?.collection("users")?.document(myFirebaseId)
+                ?.set(data, SetOptions.merge())
     }
 
     private fun getPostRequest(userId: Int) {
@@ -54,6 +102,8 @@ class WaitingForPlayersActivity : AppCompatActivity() {
                 Log.d(tag, "Message received $message")
                 this@WaitingForPlayersActivity.runOnUiThread {
                     if (message != "[]" && message != "0") {
+                        removeOpponentId()
+                        listenerRegistration?.remove()
                         finish()
                     } else {
                         longToast("Error occurred")
