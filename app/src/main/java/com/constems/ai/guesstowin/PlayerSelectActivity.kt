@@ -11,11 +11,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_player_select.*
 import okhttp3.*
 import org.jetbrains.anko.*
 import org.json.JSONArray
 import java.io.IOException
+import com.google.firebase.firestore.SetOptions
+
 
 class PlayerSelectActivity : AppCompatActivity() {
 
@@ -63,17 +66,67 @@ class PlayerSelectActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
             holder.playerTextView.text = playerList[position]
             holder.playerListItem.setOnClickListener {
-                val intent = Intent(this@PlayerSelectActivity, GameActivity::class.java)
-                intent.putExtra("my_firebase_id", myFirebaseId)
-                intent.putExtra("player_firebase_id", playerFirebaseId[position])
-                startActivity(intent)
-                finish()
+                val db = FirebaseFirestore.getInstance()
+
+                val data = HashMap<String, Any>()
+                data["opponentId"] = myFirebaseId
+                db.collection("users").document(playerFirebaseId[position])
+                        .set(data, SetOptions.merge())
+
+                getPostPlayerNameRequest(playerFirebaseId[position])
             }
         }
 
         override fun getItemCount(): Int {
             return playerList.size
         }
+    }
+
+    private fun getPostPlayerNameRequest(firebaseId: String) {
+        val client = OkHttpClient()
+        val body = FormBody.Builder()
+                .add("firebaseId", firebaseId)
+                .build()
+
+        val request = Request.Builder()
+                .url("http://192.168.1.82/game_script/get_name.php")
+                .post(body)
+                .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: okhttp3.Call?, e: IOException?) {
+                val message = e?.message.toString()
+                Log.w(tag, "Failure Response: $message")
+
+                this@PlayerSelectActivity.runOnUiThread {
+                    longToast("Please check your internet Connection!")
+                }
+            }
+
+            override fun onResponse(call: okhttp3.Call?, response: Response?) {
+                val message = response?.body()?.string()
+                Log.d(tag, "Message received $message")
+                this@PlayerSelectActivity.runOnUiThread {
+                    if (message != "[]" && message != "0") {
+                        val array = JSONArray(message)
+                        var opponentName:String? = null
+                        for (i in 0 until array.length()) {
+                            val temp = array.getJSONObject(i)
+                            opponentName = temp.getString("user_name")
+                        }
+                        val intent = Intent(this@PlayerSelectActivity, GameActivity::class.java)
+                        intent.putExtra("my_firebase_id", myFirebaseId)
+                        intent.putExtra("player_firebase_id", firebaseId)
+                        intent.putExtra("opponent_name", opponentName)
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        longToast("Error occurred")
+
+                    }
+                }
+            }
+        })
     }
 
     private fun getPostPlayerListRequest(userId: Int) {
