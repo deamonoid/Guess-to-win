@@ -63,7 +63,7 @@ class LoginActivity : AppCompatActivity() {
                             userId = temp.getString("id").toInt()
                             myFirebaseId = temp.getString("firebase_id")
                         }
-                        val intent = Intent(this@LoginActivity, PlayerSelectActivity::class.java)
+                        val intent = Intent(this@LoginActivity, MultiPlayerModeActivity::class.java)
                         intent.putExtra("user_id", userId)
                         intent.putExtra("firebase_id", myFirebaseId)
                         startActivity(intent)

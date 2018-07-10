@@ -1,5 +1,6 @@
 package com.constems.ai.guesstowin
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
@@ -62,7 +63,11 @@ class PlayerSelectActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
             holder.playerTextView.text = playerList[position]
             holder.playerListItem.setOnClickListener {
-                toast("FireBase Id: ${playerFirebaseId[position]}")
+                val intent = Intent(this@PlayerSelectActivity, GameActivity::class.java)
+                intent.putExtra("my_firebase_id", myFirebaseId)
+                intent.putExtra("player_firebase_id", playerFirebaseId[position])
+                startActivity(intent)
+                finish()
             }
         }
 
@@ -117,47 +122,47 @@ class PlayerSelectActivity : AppCompatActivity() {
         })
     }
 
-    private fun getPostRequest(userId: Int) {
-        val client = OkHttpClient()
-        val body = FormBody.Builder()
-                .add("userId", userId.toString())
-                .build()
-
-        val request = Request.Builder()
-                .url("http://192.168.1.82/game_script/logout.php")
-                .post(body)
-                .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: okhttp3.Call?, e: IOException?) {
-                val message = e?.message.toString()
-                Log.w(tag, "Failure Response: $message")
-
-                this@PlayerSelectActivity.runOnUiThread {
-                    longToast("Please check your internet Connection!")
-                }
-            }
-
-            override fun onResponse(call: okhttp3.Call?, response: Response?) {
-                val message = response?.body()?.string()
-                Log.d(tag, "Message received $message")
-                this@PlayerSelectActivity.runOnUiThread {
-                    if (message != "[]" && message != "0") {
-                        finish()
-                    } else {
-                        longToast("Error occurred")
-                    }
-                }
-            }
-        })
-    }
-
-    override fun onBackPressed() {
-        alert("Do you want to Logout?") {
-            yesButton {
-                getPostRequest(userId)
-            }
-            noButton { }
-        }.show()
-    }
+//    private fun getPostRequest(userId: Int) {
+//        val client = OkHttpClient()
+//        val body = FormBody.Builder()
+//                .add("userId", userId.toString())
+//                .build()
+//
+//        val request = Request.Builder()
+//                .url("http://192.168.1.82/game_script/logout.php")
+//                .post(body)
+//                .build()
+//
+//        client.newCall(request).enqueue(object : Callback {
+//            override fun onFailure(call: okhttp3.Call?, e: IOException?) {
+//                val message = e?.message.toString()
+//                Log.w(tag, "Failure Response: $message")
+//
+//                this@PlayerSelectActivity.runOnUiThread {
+//                    longToast("Please check your internet Connection!")
+//                }
+//            }
+//
+//            override fun onResponse(call: okhttp3.Call?, response: Response?) {
+//                val message = response?.body()?.string()
+//                Log.d(tag, "Message received $message")
+//                this@PlayerSelectActivity.runOnUiThread {
+//                    if (message != "[]" && message != "0") {
+//                        finish()
+//                    } else {
+//                        longToast("Error occurred")
+//                    }
+//                }
+//            }
+//        })
+//    }
+//
+//    override fun onBackPressed() {
+//        alert("Do you want to Logout?") {
+//            yesButton {
+//                getPostRequest(userId)
+//            }
+//            noButton { }
+//        }.show()
+//    }
 }
