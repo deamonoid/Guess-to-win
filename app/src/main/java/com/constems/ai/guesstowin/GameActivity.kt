@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import kotlinx.android.synthetic.main.activity_game.*
@@ -18,7 +17,6 @@ class GameActivity : AppCompatActivity() {
 
     private val tag = GameActivity::class.java.simpleName
 
-    private var yourTurn: Boolean = false
     private var listenerRegistration: ListenerRegistration? = null
     private var db: FirebaseFirestore? = null
 
@@ -43,14 +41,14 @@ class GameActivity : AppCompatActivity() {
 
         startListening()
 
-        yourTurn = isHost
-        if (yourTurn) {
+        if (isHost) {
             button_game_send.isEnabled = true
             textView_game_turn.text = "Your turn"
         }
 
         button_game_send.setOnClickListener {
             val message = editText_game_sendMessage.text
+            editText_game_sendMessage.setText("")
             sendMessage(message.toString())
         }
     }
@@ -64,18 +62,11 @@ class GameActivity : AppCompatActivity() {
                 ?.set(data, SetOptions.merge())
 
         button_game_send.isEnabled = false
-        yourTurn = false
         textView_game_turn.text = "Their turn"
     }
 
     private fun startListening() {
         db = FirebaseFirestore.getInstance()
-
-        //Added because in documentation
-        val settings = FirebaseFirestoreSettings.Builder()
-                .setTimestampsInSnapshotsEnabled(true)
-                .build()
-        db?.firestoreSettings = settings
 
         //Listener starts from here
         val docRef = db?.collection("users")?.document(playerFirebaseId!!)
@@ -86,10 +77,6 @@ class GameActivity : AppCompatActivity() {
             }
 
             if (snapshot != null && snapshot.exists()) {
-                val timestamp = snapshot.getTimestamp("created_at")
-                val date = timestamp?.toDate()
-                Log.d(tag, "Current date: $date")
-
                 val data = snapshot.data!!
                 val move = data["move"]
 
@@ -97,7 +84,6 @@ class GameActivity : AppCompatActivity() {
                     textView_game_recieveMessage.text = move.toString()
                     button_game_send.isEnabled = true
                     textView_game_turn.text = "Your turn"
-                    yourTurn = true
                 }
 
             } else {
@@ -111,6 +97,7 @@ class GameActivity : AppCompatActivity() {
 
         val data = HashMap<String, Any>()
         data["move"] = ""
+        data["opponentId"] = ""
         db?.collection("users")?.document(myFirebaseId!!)
                 ?.set(data, SetOptions.merge())
     }
@@ -141,8 +128,8 @@ class GameActivity : AppCompatActivity() {
                 Log.d(tag, "Message received $message")
                 this@GameActivity.runOnUiThread {
                     if (message != "[]" && message != "0") {
-                        removeMoveData()
                         listenerRegistration?.remove()
+                        removeMoveData()
                         finish()
                     } else {
                         longToast("Error occurred")

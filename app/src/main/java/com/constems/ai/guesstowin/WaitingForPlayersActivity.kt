@@ -37,12 +37,6 @@ class WaitingForPlayersActivity : AppCompatActivity() {
     private fun listenToFireStore() {
         db = FirebaseFirestore.getInstance()
 
-        //Added because in documentation
-        val settings = FirebaseFirestoreSettings.Builder()
-                .setTimestampsInSnapshotsEnabled(true)
-                .build()
-        db?.firestoreSettings = settings
-
         //Listener starts from here
         val docRef = db?.collection("users")?.document(myFirebaseId)
         listenerRegistration = docRef?.addSnapshotListener { snapshot, firebaseFirestoreException ->
@@ -52,10 +46,6 @@ class WaitingForPlayersActivity : AppCompatActivity() {
             }
 
             if (snapshot != null && snapshot.exists()) {
-                val timestamp = snapshot.getTimestamp("created_at")
-                val date = timestamp?.toDate()
-                Log.d(tag, "Current date: $date")
-
                 val data = snapshot.data!!
                 val opponentId = data["opponentId"]
 
@@ -110,6 +100,7 @@ class WaitingForPlayersActivity : AppCompatActivity() {
                             val temp = array.getJSONObject(i)
                             opponentName = temp.getString("user_name")
                         }
+                        listenerRegistration?.remove()
                         val intent = Intent(this@WaitingForPlayersActivity, GameActivity::class.java)
                         intent.putExtra("my_firebase_id", myFirebaseId)
                         intent.putExtra("player_firebase_id", firebaseId)
@@ -152,8 +143,8 @@ class WaitingForPlayersActivity : AppCompatActivity() {
                 Log.d(tag, "Message received $message")
                 this@WaitingForPlayersActivity.runOnUiThread {
                     if (message != "[]" && message != "0") {
-                        removeOpponentId()
                         listenerRegistration?.remove()
+                        removeOpponentId()
                         finish()
                     } else {
                         longToast("Error occurred")
