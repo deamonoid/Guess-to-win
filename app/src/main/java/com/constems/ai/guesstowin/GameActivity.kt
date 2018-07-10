@@ -2,10 +2,24 @@ package com.constems.ai.guesstowin
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Message
 import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.SetOptions
 import kotlinx.android.synthetic.main.activity_game.*
 
 class GameActivity : AppCompatActivity() {
+
+    private val tag = GameActivity::class.java.simpleName
+
+    private var yourTurn: Boolean = false
+    private var listenerRegistration: ListenerRegistration? = null
+    private var db: FirebaseFirestore? = null
+
+    private var myFirebaseId: String? = null
+    private var playerFirebaseId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,11 +29,74 @@ class GameActivity : AppCompatActivity() {
 
         val builder = intent.extras
         val opponentName = builder.getString("opponent_name", "")
-        val myFirebaseId = builder.getString("my_firebase_id", "")
-        val playerFirebaseId = builder.getString("player_firebase_id", "")
+        myFirebaseId = builder.getString("my_firebase_id", "")
+        playerFirebaseId = builder.getString("player_firebase_id", "")
+        val isHost = builder.getBoolean("isHost", false)
 
         textView_game_opponentName.text = opponentName.capitalize()
 
-        Log.v("GameActivity", "FirebaseID: $myFirebaseId, PlayerFirebaseId: $playerFirebaseId")
+        startListening()
+
+        yourTurn = isHost
+        if (yourTurn) {
+            button_game_send.isEnabled = true
+            textView_game_turn.text = "Your turn"
+        }
+
+        button_game_send.setOnClickListener {
+            val message = editText_game_sendMessage.text
+            sendMessage(message.toString())
+        }
+    }
+
+    private fun sendMessage(message: String) {
+        db = FirebaseFirestore.getInstance()
+
+        val data = HashMap<String, Any>()
+        data["move"] = message
+        db?.collection("users")?.document(myFirebaseId!!)
+                ?.set(data, SetOptions.merge())
+
+        button_game_send.isEnabled = false
+        yourTurn = false
+        textView_game_turn.text = "Their turn"
+    }
+
+    private fun startListening() {
+        db = FirebaseFirestore.getInstance()
+
+        //Added because in documentation
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build()
+        db?.firestoreSettings = settings
+
+        //Listener starts from here
+        val docRef = db?.collection("users")?.document(playerFirebaseId!!)
+        listenerRegistration = docRef?.addSnapshotListener { snapshot, firebaseFirestoreException ->
+            if (firebaseFirestoreException != null) {
+                Log.w(tag, "Listen failed.", firebaseFirestoreException)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                val timestamp = snapshot.getTimestamp("created_at")
+                val date = timestamp?.toDate()
+                Log.d(tag, "Current date: $date")
+
+                val data = snapshot.data!!
+                val move = data["move"]
+
+                if (move != "") {
+                    textView_game_recieveMessage.text = move.toString()
+                    button_game_send.isEnabled = true
+                    textView_game_turn.text = "Your turn"
+                    yourTurn = true
+                }
+
+            } else {
+                Log.d(tag, "Current data: null")
+            }
+        }
     }
 }
