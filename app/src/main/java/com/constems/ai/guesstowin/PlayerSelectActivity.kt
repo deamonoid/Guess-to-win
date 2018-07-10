@@ -12,20 +12,19 @@ import android.view.ViewGroup
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_player_select.*
 import okhttp3.*
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.longToast
-import org.jetbrains.anko.noButton
-import org.jetbrains.anko.yesButton
+import org.jetbrains.anko.*
 import org.json.JSONArray
 import java.io.IOException
 
 class PlayerSelectActivity : AppCompatActivity() {
 
     private var playerArrayList: ArrayList<String> = ArrayList()
+    private var playerFirebaseId: ArrayList<String> = ArrayList()
 
     private var mAdapter: ListAdapter? = null
     private val tag = PlayerSelectActivity::class.java.simpleName
-    private var userName: String? = null
+    private var userId: Int = 0
+    private var myFirebaseId: String = String()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,11 +33,12 @@ class PlayerSelectActivity : AppCompatActivity() {
         setSupportActionBar(toolbar_playerSelect)
 
         val builder = intent.extras
-        userName = builder.getString("username", "")
-        getPostPLayerListRequest(userName!!)
+        userId = builder.getInt("user_id", 0)
+        myFirebaseId = builder.getString("firebase_id", "")
+        getPostPlayerListRequest(userId)
 
         swipeRefreshLayout_playerSelect.setOnRefreshListener {
-            getPostPLayerListRequest(userName!!)
+            getPostPlayerListRequest(userId)
         }
 
         val layoutManager = LinearLayoutManager(this@PlayerSelectActivity)
@@ -61,7 +61,9 @@ class PlayerSelectActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
             holder.playerTextView.text = playerList[position]
-            holder.playerListItem.setOnClickListener {}
+            holder.playerListItem.setOnClickListener {
+                toast("FireBase Id: ${playerFirebaseId[position]}")
+            }
         }
 
         override fun getItemCount(): Int {
@@ -69,10 +71,10 @@ class PlayerSelectActivity : AppCompatActivity() {
         }
     }
 
-    private fun getPostPLayerListRequest(userName: String) {
+    private fun getPostPlayerListRequest(userId: Int) {
         val client = OkHttpClient()
         val body = FormBody.Builder()
-                .add("userName", userName)
+                .add("userId", userId.toString())
                 .build()
 
         val request = Request.Builder()
@@ -87,6 +89,7 @@ class PlayerSelectActivity : AppCompatActivity() {
 
                 this@PlayerSelectActivity.runOnUiThread {
                     longToast("Please check your internet Connection!")
+                    swipeRefreshLayout_playerSelect.isRefreshing = false
                 }
             }
 
@@ -100,22 +103,24 @@ class PlayerSelectActivity : AppCompatActivity() {
                         for (i in 0 until array.length()) {
                             val temp = array.getJSONObject(i)
                             playerArrayList.add(temp.getString("user_name").capitalize())
+                            playerFirebaseId.add(temp.getString("firebase_id"))
                         }
                         Log.v(tag, "PlayerList: " + playerArrayList.size)
                         mAdapter!!.notifyDataSetChanged()
                         swipeRefreshLayout_playerSelect.isRefreshing = false
                     } else {
                         longToast("No player online")
+                        swipeRefreshLayout_playerSelect.isRefreshing = false
                     }
                 }
             }
         })
     }
 
-    private fun getPostRequest(userName: String) {
+    private fun getPostRequest(userId: Int) {
         val client = OkHttpClient()
         val body = FormBody.Builder()
-                .add("userName", userName)
+                .add("userId", userId.toString())
                 .build()
 
         val request = Request.Builder()
@@ -150,7 +155,7 @@ class PlayerSelectActivity : AppCompatActivity() {
     override fun onBackPressed() {
         alert("Do you want to Logout?") {
             yesButton {
-                getPostRequest(userName!!)
+                getPostRequest(userId)
             }
             noButton { }
         }.show()
