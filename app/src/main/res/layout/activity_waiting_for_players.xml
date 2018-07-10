@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".WaitingForPlayersActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_waitingForPlayers"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="Waiting for players" />
+
+    <ProgressBar
+        android:id="@+id/progressBar_waitingForPlayers"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_waitingForPlayers" />
+
+    <TextView
+        android:id="@+id/textView_waitingForPlayer_progressLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Waiting for a player to join"
+        app:layout_constraintEnd_toEndOf="@+id/progressBar_waitingForPlayers"
+        app:layout_constraintStart_toStartOf="@+id/progressBar_waitingForPlayers"
+        app:layout_constraintTop_toBottomOf="@+id/progressBar_waitingForPlayers" />
+</android.support.constraint.ConstraintLayout>
