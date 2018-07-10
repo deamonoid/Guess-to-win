@@ -7,11 +7,14 @@ import android.util.Log
 import kotlinx.android.synthetic.main.activity_login.*
 import okhttp3.*
 import org.jetbrains.anko.longToast
+import org.json.JSONArray
 import java.io.IOException
 
 class LoginActivity : AppCompatActivity() {
 
     private var tag = LoginActivity::class.java.simpleName
+    private var myFirebaseId: String = String()
+    private var userId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,8 +57,15 @@ class LoginActivity : AppCompatActivity() {
                 Log.d(tag, "Message received $message")
                 this@LoginActivity.runOnUiThread {
                     if (message != "[]" && message != "0") {
+                        val array = JSONArray(message)
+                        for (i in 0 until array.length()) {
+                            val temp = array.getJSONObject(i)
+                            userId = temp.getString("id").toInt()
+                            myFirebaseId = temp.getString("firebase_id")
+                        }
                         val intent = Intent(this@LoginActivity, PlayerSelectActivity::class.java)
-                        intent.putExtra("username", userName)
+                        intent.putExtra("user_id", userId)
+                        intent.putExtra("firebase_id", myFirebaseId)
                         startActivity(intent)
                         finish()
                     } else {
