@@ -19,54 +19,12 @@
         app:title="@string/app_name" />
 
     <TextView
-        android:id="@+id/textView_game_recieveMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Their message"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_gameActivity" />
-
-    <EditText
-        android:id="@+id/editText_game_sendMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="16dp"
-        android:ems="10"
-        android:hint="Send message"
-        android:inputType="text"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button_game_send"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/button_game_send"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="send"
-        android:enabled="false"
-        app:layout_constraintBottom_toBottomOf="@+id/editText_game_sendMessage"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/editText_game_sendMessage" />
-
-    <TextView
         android:id="@+id/textView_game_opponentName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="Name"
-        android:textSize="30sp"
+        android:text="Opponent Name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_gameActivity" />
 
@@ -77,7 +35,331 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
         android:text="Your turn"
-        android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_gameActivity" />
+
+    <TextView
+        android:id="@+id/textView_game_playerGridLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Select the area"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView_game_opponentName" />
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView_game_playerGridLabel">
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline_game"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <android.support.v7.widget.GridLayout
+            android:id="@+id/gridLayout_game_playerArea"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="16dp"
+            app:columnCount="3"
+            app:layout_constraintBottom_toTopOf="@+id/guideline_game"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:rowCount="3">
+
+            <FrameLayout
+                android:id="@+id/x0x0x"
+                android:background="@drawable/border"
+                android:tag="x0x0x"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/w_x0x0x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/x0x1x"
+                android:background="@drawable/border"
+                android:tag="x0x1x"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/w_x0x1x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/x0x2x"
+                android:background="@drawable/border"
+                android:tag="x0x2x"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/w_x0x2x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/x1x0x"
+                android:background="@drawable/border"
+                android:tag="x1x0x"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/w_x1x0x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/x1x1x"
+                android:background="@drawable/border"
+                android:tag="x1x1x"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/w_x1x1x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/x1x2x"
+                android:background="@drawable/border"
+                android:tag="x1x2x"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/w_x1x2x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/x2x0x"
+                android:background="@drawable/border"
+                android:tag="x2x0x"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/w_x2x0x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/x2x1x"
+                android:background="@drawable/border"
+                android:tag="x2x1x"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/w_x2x1x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/x2x2x"
+                android:background="@drawable/border"
+                android:tag="x2x2x"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/w_x2x2x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+        </android.support.v7.widget.GridLayout>
+
+        <android.support.v7.widget.GridLayout
+            android:id="@+id/gridLayout_game_opponentArea"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            app:columnCount="3"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_game_opponentGridLabel"
+            app:rowCount="3">
+
+            <FrameLayout
+                android:id="@+id/o_x0x0x"
+                android:background="@drawable/border"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/i_x0x0x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/o_x0x1x"
+                android:background="@drawable/border"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/i_x0x1x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/o_x0x2x"
+                android:background="@drawable/border"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/i_x0x2x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/o_x1x0x"
+                android:background="@drawable/border"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/i_x1x0x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/o_x1x1x"
+                android:background="@drawable/border"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/i_x1x1x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/o_x1x2x"
+                android:background="@drawable/border"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/i_x1x2x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/o_x2x0x"
+                android:background="@drawable/border"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/i_x2x0x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/o_x2x1x"
+                android:background="@drawable/border"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/i_x2x1x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/o_x2x2x"
+                android:background="@drawable/border"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1">
+
+                <ImageView
+                    android:id="@+id/i_x2x2x"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp" />
+            </FrameLayout>
+
+        </android.support.v7.widget.GridLayout>
+
+        <TextView
+            android:id="@+id/textView_game_opponentGridLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Opponent area"
+            app:layout_constraintTop_toTopOf="@+id/guideline_game"
+            tools:layout_editor_absoluteX="10dp" />
+
+        <FrameLayout
+            android:id="@+id/frameLayout_game_mask"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/gridLayout_game_playerArea"
+            app:layout_constraintEnd_toEndOf="@+id/gridLayout_game_playerArea"
+            app:layout_constraintStart_toStartOf="@+id/gridLayout_game_playerArea"
+            app:layout_constraintTop_toTopOf="@+id/gridLayout_game_playerArea">
+
+        </FrameLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+
 </android.support.constraint.ConstraintLayout>

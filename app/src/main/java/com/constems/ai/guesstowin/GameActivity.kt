@@ -4,13 +4,17 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.View
+import android.widget.ImageView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import kotlinx.android.synthetic.main.activity_game.*
 import okhttp3.*
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.longToast
 import org.jetbrains.anko.toast
+import org.jetbrains.anko.yesButton
 import java.io.IOException
 
 class GameActivity : AppCompatActivity() {
@@ -25,6 +29,14 @@ class GameActivity : AppCompatActivity() {
 
     private var doubleBackToExitPressedOnce = false
 
+    private var isHost = false
+
+    private var targetBox: String? = null
+    private var opponentTargetBox: String? = null
+
+    private var targetMode = true
+    private var targetAcquired = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
@@ -35,25 +47,71 @@ class GameActivity : AppCompatActivity() {
         val opponentName = builder.getString("opponent_name", "")
         myFirebaseId = builder.getString("my_firebase_id", "")
         playerFirebaseId = builder.getString("player_firebase_id", "")
-        val isHost = builder.getBoolean("isHost", false)
+        isHost = builder.getBoolean("isHost", false)
 
         textView_game_opponentName.text = opponentName.capitalize()
 
+        initializeAllOnClickListener()
         startListening()
+        setTargetBox()
+    }
 
-        if (isHost) {
-            button_game_send.isEnabled = true
-            textView_game_turn.text = "Your turn"
-        }
-
-        button_game_send.setOnClickListener {
-            val message = editText_game_sendMessage.text
-            editText_game_sendMessage.setText("")
-            sendMessage(message.toString())
+    private fun setTargetBox() {
+        alert("Select a box in 'Select the area' grid to set a target") {
+            yesButton { }
         }
     }
 
-    private fun sendMessage(message: String) {
+    private fun initializeAllOnClickListener() {
+        x0x0x.setOnClickListener {
+            sendTargetOrMove(it)
+        }
+        x0x1x.setOnClickListener {
+            sendTargetOrMove(it)
+        }
+        x0x2x.setOnClickListener {
+            sendTargetOrMove(it)
+        }
+        x1x0x.setOnClickListener {
+            sendTargetOrMove(it)
+        }
+        x1x1x.setOnClickListener {
+            sendTargetOrMove(it)
+        }
+        x1x2x.setOnClickListener {
+            sendTargetOrMove(it)
+        }
+        x2x0x.setOnClickListener {
+            sendTargetOrMove(it)
+        }
+        x2x1x.setOnClickListener {
+            sendTargetOrMove(it)
+        }
+        x2x2x.setOnClickListener {
+            sendTargetOrMove(it)
+        }
+    }
+
+    private fun sendTargetOrMove(it: View) {
+        if (targetMode) {
+            sendTarget(it.tag.toString())
+            targetBox = it.tag.toString()
+            targetMode = false
+        } else {
+            sendMove(it.tag.toString())
+        }
+    }
+
+    private fun sendTarget(message: String) {
+        db = FirebaseFirestore.getInstance()
+
+        val data = HashMap<String, Any>()
+        data["target"] = message
+        db?.collection("users")?.document(myFirebaseId!!)
+                ?.set(data, SetOptions.merge())
+    }
+
+    private fun sendMove(message: String) {
         db = FirebaseFirestore.getInstance()
 
         val data = HashMap<String, Any>()
@@ -61,7 +119,7 @@ class GameActivity : AppCompatActivity() {
         db?.collection("users")?.document(myFirebaseId!!)
                 ?.set(data, SetOptions.merge())
 
-        button_game_send.isEnabled = false
+        disableGridTouch()
         textView_game_turn.text = "Their turn"
     }
 
@@ -78,18 +136,63 @@ class GameActivity : AppCompatActivity() {
 
             if (snapshot != null && snapshot.exists()) {
                 val data = snapshot.data!!
+                val winningMove = data["winning_move"]
+                val targetData = data["target"]
                 val move = data["move"]
 
+                if (targetData != "") {
+                    val message = targetData.toString()
+                    opponentTargetBox = message
+                    targetAcquired = true
+                    firstTurn()
+                }
+
                 if (move != "") {
-                    textView_game_recieveMessage.text = move.toString()
-                    button_game_send.isEnabled = true
-                    textView_game_turn.text = "Your turn"
+                    val message = move.toString()
+                    val finalMessage = "i_$message"
+                    val resId = baseContext.resources.getIdentifier(finalMessage, "layout", baseContext.packageName)
+                    val chosenBox = findViewById<ImageView>(resId)
+
+                    if ("i_$targetBox" == finalMessage) {
+                        chosenBox.setImageResource(R.drawable.ic_hit_icon)
+                        sendWinningMessage("w_$message")
+                        longToast("GAME OVER")
+                    } else {
+                        chosenBox.setImageResource(R.drawable.ic_miss_icon)
+                        enableGridTouch()
+                        textView_game_turn.text = "Your turn"
+                    }
+                }
+
+                if (winningMove != "" && winningMove.toString().contains("w_")) {
+                    val finalMessage = winningMove.toString()
+                    val resId = baseContext.resources.getIdentifier(finalMessage, "layout", baseContext.packageName)
+                    val winningBox = findViewById<ImageView>(resId)
+                    winningBox.setImageResource(R.drawable.ic_hit_icon)
+                } else if (winningMove != "") {
+
                 }
 
             } else {
                 Log.d(tag, "Current data: null")
             }
         }
+    }
+
+    private fun firstTurn() {
+        if (isHost) {
+            enableGridTouch()
+            textView_game_turn.text = "Your turn"
+        }
+    }
+
+    private fun sendWinningMessage(message: String) {
+        db = FirebaseFirestore.getInstance()
+
+        val data = HashMap<String, Any>()
+        data["winning_move"] = message
+        db?.collection("users")?.document(myFirebaseId!!)
+                ?.set(data, SetOptions.merge())
     }
 
     private fun removeMoveData() {
@@ -139,12 +242,20 @@ class GameActivity : AppCompatActivity() {
         })
     }
 
+    private fun disableGridTouch() {
+        frameLayout_game_mask.visibility = View.VISIBLE
+    }
+
+    private fun enableGridTouch() {
+        frameLayout_game_mask.visibility = View.GONE
+    }
+
     override fun onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             getPostRequest(myFirebaseId!!)
         }
 
-        this.doubleBackToExitPressedOnce = true
+        this@GameActivity.doubleBackToExitPressedOnce = true
         toast("Please click BACK again to exit")
 
         Handler().postDelayed({
