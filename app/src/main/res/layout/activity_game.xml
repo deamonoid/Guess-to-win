@@ -351,12 +351,23 @@
             android:id="@+id/frameLayout_game_mask"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:visibility="gone"
+            android:background="#88676767"
             android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/gridLayout_game_playerArea"
             app:layout_constraintEnd_toEndOf="@+id/gridLayout_game_playerArea"
             app:layout_constraintStart_toStartOf="@+id/gridLayout_game_playerArea"
             app:layout_constraintTop_toTopOf="@+id/gridLayout_game_playerArea">
+
+            <TextView
+                android:id="@+id/textView_game_gameState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Waiting for Opponent"
+                android:textColor="@android:color/white"
+                android:textSize="18sp" />
 
         </FrameLayout>
 
