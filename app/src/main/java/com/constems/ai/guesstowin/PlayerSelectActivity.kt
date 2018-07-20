@@ -6,17 +6,13 @@ import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_player_select.*
-import okhttp3.*
 import org.jetbrains.anko.*
-import org.json.JSONArray
-import java.io.IOException
 import com.google.firebase.firestore.SetOptions
 
 
@@ -25,9 +21,9 @@ class PlayerSelectActivity : AppCompatActivity() {
     private var playerArrayList: ArrayList<String> = ArrayList()
     private var playerFirebaseId: ArrayList<String> = ArrayList()
 
+    private var db: FirebaseFirestore? = null
+
     private var mAdapter: ListAdapter? = null
-    private val tag = PlayerSelectActivity::class.java.simpleName
-    private var userId: Int = 0
     private var myFirebaseId: String = String()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,12 +33,11 @@ class PlayerSelectActivity : AppCompatActivity() {
         setSupportActionBar(toolbar_playerSelect)
 
         val builder = intent.extras
-        userId = builder.getInt("user_id", 0)
         myFirebaseId = builder.getString("firebase_id", "")
-        getPostPlayerListRequest(userId)
+        getPlayerList()
 
         swipeRefreshLayout_playerSelect.setOnRefreshListener {
-            getPostPlayerListRequest(userId)
+            getPlayerList()
         }
 
         val layoutManager = LinearLayoutManager(this@PlayerSelectActivity)
@@ -73,7 +68,13 @@ class PlayerSelectActivity : AppCompatActivity() {
                 db.collection("users").document(playerFirebaseId[position])
                         .set(data, SetOptions.merge())
 
-                getPostPlayerNameRequest(playerFirebaseId[position])
+                val intent = Intent(this@PlayerSelectActivity, GameActivity::class.java)
+                intent.putExtra("my_firebase_id", myFirebaseId)
+                intent.putExtra("player_firebase_id", playerFirebaseId[position])
+                intent.putExtra("opponent_name", playerList[position])
+                intent.putExtra("isHost", false)
+                startActivity(intent)
+                finish()
             }
         }
 
@@ -82,97 +83,22 @@ class PlayerSelectActivity : AppCompatActivity() {
         }
     }
 
-    private fun getPostPlayerNameRequest(firebaseId: String) {
-        val client = OkHttpClient()
-        val body = FormBody.Builder()
-                .add("firebaseId", firebaseId)
-                .build()
-
-        val request = Request.Builder()
-                .url("http://192.168.1.82/game_script/get_name.php")
-                .post(body)
-                .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: okhttp3.Call?, e: IOException?) {
-                val message = e?.message.toString()
-                Log.w(tag, "Failure Response: $message")
-
-                this@PlayerSelectActivity.runOnUiThread {
-                    longToast("Please check your internet Connection!")
+    private fun getPlayerList() {
+        db = FirebaseFirestore.getInstance()
+        val query = db!!.collection("login").whereEqualTo("status", true)
+        query.get().addOnSuccessListener { querySnapshot ->
+            playerArrayList.clear()
+            if (!querySnapshot.isEmpty) {
+                querySnapshot.forEach {
+                    playerArrayList.add(it.getString("name")!!)
+                    playerFirebaseId.add(it.getString("firebase")!!)
                 }
+                mAdapter!!.notifyDataSetChanged()
+                swipeRefreshLayout_playerSelect.isRefreshing = false
+            } else {
+                toast("No player online")
+                swipeRefreshLayout_playerSelect.isRefreshing = false
             }
-
-            override fun onResponse(call: okhttp3.Call?, response: Response?) {
-                val message = response?.body()?.string()
-                Log.d(tag, "Message received $message")
-                this@PlayerSelectActivity.runOnUiThread {
-                    if (message != "[]" && message != "0") {
-                        val array = JSONArray(message)
-                        var opponentName:String? = null
-                        for (i in 0 until array.length()) {
-                            val temp = array.getJSONObject(i)
-                            opponentName = temp.getString("user_name")
-                        }
-                        val intent = Intent(this@PlayerSelectActivity, GameActivity::class.java)
-                        intent.putExtra("my_firebase_id", myFirebaseId)
-                        intent.putExtra("player_firebase_id", firebaseId)
-                        intent.putExtra("opponent_name", opponentName)
-                        intent.putExtra("isHost", false)
-                        startActivity(intent)
-                        finish()
-                    } else {
-                        longToast("Error occurred")
-
-                    }
-                }
-            }
-        })
-    }
-
-    private fun getPostPlayerListRequest(userId: Int) {
-        val client = OkHttpClient()
-        val body = FormBody.Builder()
-                .add("userId", userId.toString())
-                .build()
-
-        val request = Request.Builder()
-                .url("http://192.168.1.82/game_script/list_player.php")
-                .post(body)
-                .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: okhttp3.Call?, e: IOException?) {
-                val message = e?.message.toString()
-                Log.w(tag, "Failure Response: $message")
-
-                this@PlayerSelectActivity.runOnUiThread {
-                    longToast("Please check your internet Connection!")
-                    swipeRefreshLayout_playerSelect.isRefreshing = false
-                }
-            }
-
-            override fun onResponse(call: okhttp3.Call?, response: Response?) {
-                val message = response?.body()?.string()
-                Log.d(tag, "Message received $message")
-                this@PlayerSelectActivity.runOnUiThread {
-                    if (message != "[]" && message != "0") {
-                        playerArrayList.clear()
-                        val array = JSONArray(message)
-                        for (i in 0 until array.length()) {
-                            val temp = array.getJSONObject(i)
-                            playerArrayList.add(temp.getString("user_name").capitalize())
-                            playerFirebaseId.add(temp.getString("firebase_id"))
-                        }
-                        Log.v(tag, "PlayerList: " + playerArrayList.size)
-                        mAdapter!!.notifyDataSetChanged()
-                        swipeRefreshLayout_playerSelect.isRefreshing = false
-                    } else {
-                        longToast("No player online")
-                        swipeRefreshLayout_playerSelect.isRefreshing = false
-                    }
-                }
-            }
-        })
+        }
     }
 }

@@ -10,12 +10,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import kotlinx.android.synthetic.main.activity_game.*
-import okhttp3.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.longToast
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.yesButton
-import java.io.IOException
 
 class GameActivity : AppCompatActivity() {
 
@@ -225,41 +223,25 @@ class GameActivity : AppCompatActivity() {
                 ?.set(data, SetOptions.merge())
     }
 
-    private fun getPostRequest(firebaseId: String) {
-        val client = OkHttpClient()
-        val body = FormBody.Builder()
-                .add("firebaseId", firebaseId)
-                .build()
+    private fun exitGame() {
+        db = FirebaseFirestore.getInstance()
+        db?.collection("login")?.whereEqualTo("firebase", myFirebaseId)
+                ?.get()?.addOnSuccessListener { task ->
+                    if (!task.isEmpty) {
+                        val documentSnapshot = task.documents
+                        val document = documentSnapshot[0]
 
-        val request = Request.Builder()
-                .url("http://192.168.1.82/game_script/logout_game.php")
-                .post(body)
-                .build()
+                        val data = HashMap<String, Any>()
+                        data["status"] = false
+                        document.reference.set(data, SetOptions.merge())
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: okhttp3.Call?, e: IOException?) {
-                val message = e?.message.toString()
-                Log.w(tag, "Failure Response: $message")
-
-                this@GameActivity.runOnUiThread {
-                    longToast("Please check your internet Connection!")
-                }
-            }
-
-            override fun onResponse(call: okhttp3.Call?, response: Response?) {
-                val message = response?.body()?.string()
-                Log.d(tag, "Message received $message")
-                this@GameActivity.runOnUiThread {
-                    if (message != "[]" && message != "0") {
                         listenerRegistration?.remove()
                         removeMoveData()
                         finish()
                     } else {
-                        longToast("Error occurred")
+                        toast("Please check your Internet connection")
                     }
                 }
-            }
-        })
     }
 
     private fun disableGridTouch() {
@@ -272,7 +254,7 @@ class GameActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (doubleBackToExitPressedOnce) {
-            getPostRequest(myFirebaseId!!)
+            exitGame()
         }
 
         this@GameActivity.doubleBackToExitPressedOnce = true
