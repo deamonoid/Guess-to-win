@@ -52,14 +52,13 @@ class GameActivity : AppCompatActivity() {
         textView_game_opponentName.text = opponentName.capitalize()
 
         initializeAllOnClickListener()
-        startListening()
         setTargetBox()
     }
 
     private fun setTargetBox() {
         alert("Select a box in 'Select the area' grid to set a target") {
             yesButton { }
-        }
+        }.show()
     }
 
     private fun initializeAllOnClickListener() {
@@ -96,16 +95,15 @@ class GameActivity : AppCompatActivity() {
         if (targetMode) {
             sendTarget(it.tag.toString())
             targetBox = it.tag.toString()
-            val resId = baseContext.resources.getIdentifier("w_$targetBox", "layout", baseContext.packageName)
-            val chosenBox = findViewById<ImageView>(resId)
+            val chosenBox = selectPlayerImageView(targetBox!!)
             chosenBox.setImageResource(R.drawable.ic_target_icon)
+            startListening()
             targetMode = false
             disableGridTouch()
         } else {
             sendMove(it.tag.toString())
             val selectedBox = it.tag.toString()
-            val resId = baseContext.resources.getIdentifier("w_$selectedBox", "layout", baseContext.packageName)
-            val chosenBox = findViewById<ImageView>(resId)
+            val chosenBox = selectPlayerImageView(selectedBox)
             if (it.tag.toString() == opponentTargetBox) {
                 chosenBox.setImageResource(R.drawable.ic_hit_icon)
                 longToast("You WON!!")
@@ -161,8 +159,7 @@ class GameActivity : AppCompatActivity() {
 
                 if (move != "") {
                     val message = move.toString()
-                    val resId = baseContext.resources.getIdentifier("i_$message", "layout", baseContext.packageName)
-                    val chosenBox = findViewById<ImageView>(resId)
+                    val chosenBox = selectOpponentImageView(message)
 
                     if (targetBox == message) {
                         chosenBox.setImageResource(R.drawable.ic_hit_icon)
@@ -189,13 +186,45 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
+    private fun selectPlayerImageView(resIdName: String): ImageView {
+        return when (resIdName) {
+            "x0x0x" -> w_x0x0x
+            "x0x1x" -> w_x0x1x
+            "x0x2x" -> w_x0x2x
+            "x1x0x" -> w_x1x0x
+            "x1x1x" -> w_x1x1x
+            "x1x2x" -> w_x1x2x
+            "x2x0x" -> w_x2x0x
+            "x2x1x" -> w_x2x1x
+            else -> {
+                w_x2x2x
+            }
+        }
+    }
+
+    private fun selectOpponentImageView(resIdName: String): ImageView {
+        return when (resIdName) {
+            "x0x0x" -> i_x0x0x
+            "x0x1x" -> i_x0x1x
+            "x0x2x" -> i_x0x2x
+            "x1x0x" -> i_x1x0x
+            "x1x1x" -> i_x1x1x
+            "x1x2x" -> i_x1x2x
+            "x2x0x" -> i_x2x0x
+            "x2x1x" -> i_x2x1x
+            else -> {
+                i_x2x2x
+            }
+        }
+    }
+
     private fun removeMoveData() {
         db = FirebaseFirestore.getInstance()
 
         val data = HashMap<String, Any>()
         data["move"] = ""
         data["opponentId"] = ""
-        data["target"]
+        data["target"] = ""
         db?.collection("users")?.document(myFirebaseId!!)
                 ?.set(data, SetOptions.merge())
     }
