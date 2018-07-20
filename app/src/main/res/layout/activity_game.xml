@@ -352,6 +352,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:visibility="gone"
+            android:clickable="true"
             app:layout_constraintBottom_toBottomOf="@+id/gridLayout_game_playerArea"
             app:layout_constraintEnd_toEndOf="@+id/gridLayout_game_playerArea"
             app:layout_constraintStart_toStartOf="@+id/gridLayout_game_playerArea"
