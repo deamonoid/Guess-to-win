@@ -96,9 +96,22 @@ class GameActivity : AppCompatActivity() {
         if (targetMode) {
             sendTarget(it.tag.toString())
             targetBox = it.tag.toString()
+            val resId = baseContext.resources.getIdentifier("w_$targetBox", "layout", baseContext.packageName)
+            val chosenBox = findViewById<ImageView>(resId)
+            chosenBox.setImageResource(R.drawable.ic_target_icon)
             targetMode = false
+            disableGridTouch()
         } else {
             sendMove(it.tag.toString())
+            val selectedBox = it.tag.toString()
+            val resId = baseContext.resources.getIdentifier("w_$selectedBox", "layout", baseContext.packageName)
+            val chosenBox = findViewById<ImageView>(resId)
+            if (it.tag.toString() == opponentTargetBox) {
+                chosenBox.setImageResource(R.drawable.ic_hit_icon)
+                longToast("You WON!!")
+            } else {
+                chosenBox.setImageResource(R.drawable.ic_miss_icon)
+            }
         }
     }
 
@@ -136,7 +149,6 @@ class GameActivity : AppCompatActivity() {
 
             if (snapshot != null && snapshot.exists()) {
                 val data = snapshot.data!!
-                val winningMove = data["winning_move"]
                 val targetData = data["target"]
                 val move = data["move"]
 
@@ -149,13 +161,11 @@ class GameActivity : AppCompatActivity() {
 
                 if (move != "") {
                     val message = move.toString()
-                    val finalMessage = "i_$message"
-                    val resId = baseContext.resources.getIdentifier(finalMessage, "layout", baseContext.packageName)
+                    val resId = baseContext.resources.getIdentifier("i_$message", "layout", baseContext.packageName)
                     val chosenBox = findViewById<ImageView>(resId)
 
-                    if ("i_$targetBox" == finalMessage) {
+                    if (targetBox == message) {
                         chosenBox.setImageResource(R.drawable.ic_hit_icon)
-                        sendWinningMessage("w_$message")
                         longToast("GAME OVER")
                     } else {
                         chosenBox.setImageResource(R.drawable.ic_miss_icon)
@@ -163,16 +173,6 @@ class GameActivity : AppCompatActivity() {
                         textView_game_turn.text = "Your turn"
                     }
                 }
-
-                if (winningMove != "" && winningMove.toString().contains("w_")) {
-                    val finalMessage = winningMove.toString()
-                    val resId = baseContext.resources.getIdentifier(finalMessage, "layout", baseContext.packageName)
-                    val winningBox = findViewById<ImageView>(resId)
-                    winningBox.setImageResource(R.drawable.ic_hit_icon)
-                } else if (winningMove != "") {
-
-                }
-
             } else {
                 Log.d(tag, "Current data: null")
             }
@@ -183,16 +183,10 @@ class GameActivity : AppCompatActivity() {
         if (isHost) {
             enableGridTouch()
             textView_game_turn.text = "Your turn"
+        } else {
+            disableGridTouch()
+            textView_game_turn.text = "Their turn"
         }
-    }
-
-    private fun sendWinningMessage(message: String) {
-        db = FirebaseFirestore.getInstance()
-
-        val data = HashMap<String, Any>()
-        data["winning_move"] = message
-        db?.collection("users")?.document(myFirebaseId!!)
-                ?.set(data, SetOptions.merge())
     }
 
     private fun removeMoveData() {
@@ -201,6 +195,7 @@ class GameActivity : AppCompatActivity() {
         val data = HashMap<String, Any>()
         data["move"] = ""
         data["opponentId"] = ""
+        data["target"]
         db?.collection("users")?.document(myFirebaseId!!)
                 ?.set(data, SetOptions.merge())
     }

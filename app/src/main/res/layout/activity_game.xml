@@ -344,8 +344,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Opponent area"
-            app:layout_constraintTop_toTopOf="@+id/guideline_game"
-            tools:layout_editor_absoluteX="10dp" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/guideline_game" />
 
         <FrameLayout
             android:id="@+id/frameLayout_game_mask"
