@@ -131,7 +131,6 @@ class GameActivity : AppCompatActivity() {
                 ?.set(data, SetOptions.merge())
 
         disableGridTouch()
-        textView_game_turn.text = "Their turn"
     }
 
     private fun startListening() {
@@ -167,7 +166,6 @@ class GameActivity : AppCompatActivity() {
                     } else {
                         chosenBox.setImageResource(R.drawable.ic_miss_icon)
                         enableGridTouch()
-                        textView_game_turn.text = "Your turn"
                     }
                 }
             } else {
@@ -179,10 +177,8 @@ class GameActivity : AppCompatActivity() {
     private fun firstTurn() {
         if (isHost) {
             enableGridTouch()
-            textView_game_turn.text = "Your turn"
         } else {
             disableGridTouch()
-            textView_game_turn.text = "Their turn"
         }
     }
 
