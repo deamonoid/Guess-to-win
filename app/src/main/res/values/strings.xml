@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Guess to win</string>
+    <string name="app_name">GuessToWin</string>
     <string name="username_login">Username</string>
     <string name="password_login">Password</string>
     <string name="login">Log In</string>

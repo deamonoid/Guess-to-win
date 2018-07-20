@@ -7,7 +7,7 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 27
     defaultConfig {
-        applicationId "com.constems.ai.guesstowin"
+        applicationId "com.ghost.deamonoid.guesstowin"
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 1

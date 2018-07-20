@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.constems.ai.guesstowin">
+    package="com.ghost.deamonoid.guesstowin">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -10,17 +10,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".LoginActivity">
+        <activity android:name="com.ghost.deamonoid.guesstowin.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".GameActivity" />
-        <activity android:name=".PlayerSelectActivity" />
-        <activity android:name=".MultiPlayerModeActivity" />
-        <activity android:name=".WaitingForPlayersActivity"></activity>
+        <activity android:name="com.ghost.deamonoid.guesstowin.GameActivity" />
+        <activity android:name="com.ghost.deamonoid.guesstowin.PlayerSelectActivity" />
+        <activity android:name="com.ghost.deamonoid.guesstowin.MultiPlayerModeActivity" />
+        <activity android:name="com.ghost.deamonoid.guesstowin.WaitingForPlayersActivity"></activity>
     </application>
 
 </manifest>
