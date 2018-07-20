@@ -61,6 +61,7 @@ class WaitingForPlayersActivity : AppCompatActivity() {
     }
 
     private fun startGame(opponentId: String) {
+        listenerRegistration?.remove()
         val intent = Intent(this@WaitingForPlayersActivity, GameActivity::class.java)
         intent.putExtra("my_firebase_id", myFirebaseId)
         intent.putExtra("player_firebase_id", opponentId)
